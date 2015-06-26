@@ -1,11 +1,6 @@
-#include<iostream>
-#include<EDSDK.h>
-#include<EDSDKErrors.h>
-#include<EDSDKTypes.h>
+#include "canonCam.h"
 
-using namespace std;
-
-EdsError getCanonCamera(EdsCameraRef *camera) {
+EdsError getCamera(EdsCameraRef *camera) {
 	// Function to get the camera
 	EdsError err;
 	EdsCameraListRef camList;
@@ -69,57 +64,7 @@ EdsError setCameraAsDestination(EdsCameraRef camera) {
 EdsError takePicture(EdsCameraRef camera) {
 	// Function to capture picture
 	EdsError err;
-	err = EdsSendCommand(camera,kEdsCameraCommand_PressShutterButton,0);
+	err = EdsSendCommand(camera,kEdsCameraCommand_TakePicture,0);
 	cout<<"Picture captured\n";
 	return err;
-}
-
-int main() {
-	EdsError err = EDS_ERR_OK;
-	EdsCameraRef camera = NULL;
-
-	err = EdsInitializeSDK();
-	if(err == EDS_ERR_OK) {
-		cout<<"SDK initialized\n";
-	} else 
-		cout<<"SDK not initialized\n";
-	
-	if(err == EDS_ERR_OK)
-		err = getCanonCamera(&camera);
-	
-	if(err == EDS_ERR_OK) 
-		err = EdsOpenSession(camera);
-	if(err == EDS_ERR_OK)
-		err = setCameraAsDestination(camera);
-	err = EdsSendStatusCommand(camera,kEdsCameraStatusCommand_UIUnLock,0);
-	//err = takePicture(camera);
-	err = startLiveView(camera);
-	cout<<"Press enter to start recording\n";
-	getchar();
-	if(err == EDS_ERR_OK) {
-		err = startRecording(camera);
-		if(err != EDS_ERR_OK) {
-			cout<<"Make sure the camera is in movie shooting mode\n";
-		}
-	}
-	cout<<"Enter to stop recording";
-	getchar();
-	if(err == EDS_ERR_OK) {
-		err = stopRecording(camera);
-		if(err != EDS_ERR_OK) {
-			cout<<"Not able to stop! Switch off the camera\n";
-		}
-	}
-
-	if(err == EDS_ERR_OK) {
-		err = EdsCloseSession(camera);
-	}
-
-	if(camera != NULL) 
-		EdsRelease(camera);
-	EdsTerminateSDK();
-	if(err != EDS_ERR_OK)
-		cout<<"ERROR\n";
-	getchar();
-	return 0;
 }
